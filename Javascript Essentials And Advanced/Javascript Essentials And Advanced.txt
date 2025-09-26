@@ -1,0 +1,228 @@
+Assessment  
+Module 8: JavaScript Essentials and Advanced  
+
+Case Overview  
+Scenario:  
+I am an intermediate JavaScript developer at Hashcrypt Technologies Pvt. Ltd. The company wants to build a Task Manager Web App. The app should be responsive, error-resilient, and modular. It must allow users to add tasks, edit/delete them, and save data in localStorage.  
+
+Core Functionality  
+
+1) Responsive Form Creation  
+- Create an HTML form with fields:  
+  Task Title (text), Description (textarea), Due Date (date), Priority (select: High/Medium/Low), and Status (select: To Do/In Progress/Done).  
+- Form validation makes sure all fields are filled properly.  
+- Tasks are displayed in a list under the form.  
+- Users can Edit or Delete tasks.  
+- Data is stored in localStorage so tasks remain after refresh.  
+- Layout is mobile friendly using Flexbox/Grid and media queries.  
+
+Example HTML:
+----------------------------------------------------
+<form id="taskForm">
+  <input type="text" id="title" placeholder="Task Title">
+  <textarea id="description" placeholder="Task Description"></textarea>
+  <input type="date" id="dueDate">
+  <select id="priority">
+    <option>High</option>
+    <option>Medium</option>
+    <option>Low</option>
+  </select>
+  <select id="status">
+    <option>To Do</option>
+    <option>In Progress</option>
+    <option>Done</option>
+  </select>
+  <button type="submit">Add Task</button>
+</form>
+<div id="taskList"></div>
+----------------------------------------------------
+
+2) Form Handling with Advanced JavaScript  
+We use a class to organize code.
+
+Class: CustomerFormHandler  
+
+- validateForm() → checks if:  
+  • Task title has at least 10 characters  
+  • Description is not empty  
+  • Due date is selected  
+  • Priority and Status are chosen  
+
+- saveToLocalStorage() → stores task data in localStorage as an array.  
+- clearForm() → resets form after submission.  
+- showMessage() → shows success or error messages on screen.  
+
+Example JavaScript:
+----------------------------------------------------
+class CustomerFormHandler {
+  constructor(formId) {
+    this.form = document.getElementById(formId);
+    this.tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    this.taskList = document.getElementById("taskList");
+    this.init();
+  }
+
+  validateForm(title, desc, date, priority, status) {
+    if (title.length < 10) {
+      this.showMessage("Title must be at least 10 characters", true);
+      return false;
+    }
+    if (!desc || !date || !priority || !status) {
+      this.showMessage("All fields are required", true);
+      return false;
+    }
+    return true;
+  }
+
+  saveToLocalStorage(task) {
+    this.tasks.push(task);
+    localStorage.setItem("tasks", JSON.stringify(this.tasks));
+  }
+
+  clearForm() {
+    this.form.reset();
+  }
+
+  showMessage(msg, isError=false) {
+    alert(msg); // Simple UI feedback
+  }
+
+  renderTasks() {
+    this.taskList.innerHTML = "";
+    if (this.tasks.length === 0) {
+      this.taskList.innerHTML = "<p>No tasks available</p>";
+      return;
+    }
+    this.tasks.forEach((task, index) => {
+      this.taskList.innerHTML += `
+        <div>
+          <b>${task.title}</b> (${task.status}) - ${task.priority}<br>
+          Due: ${task.dueDate}<br>
+          <button onclick="app.editTask(${index})">Edit</button>
+          <button onclick="app.deleteTask(${index})">Delete</button>
+        </div><hr>
+      `;
+    });
+  }
+
+  addTask(e) {
+    e.preventDefault();
+    let title = document.getElementById("title").value;
+    let desc = document.getElementById("description").value;
+    let dueDate = document.getElementById("dueDate").value;
+    let priority = document.getElementById("priority").value;
+    let status = document.getElementById("status").value;
+
+    if (this.validateForm(title, desc, dueDate, priority, status)) {
+      let task = { title, desc, dueDate, priority, status };
+      this.saveToLocalStorage(task);
+      this.clearForm();
+      this.showMessage("Task added successfully!");
+      this.renderTasks();
+    }
+  }
+
+  deleteTask(index) {
+    this.tasks.splice(index, 1);
+    localStorage.setItem("tasks", JSON.stringify(this.tasks));
+    this.renderTasks();
+  }
+
+  editTask(index) {
+    let task = this.tasks[index];
+    document.getElementById("title").value = task.title;
+    document.getElementById("description").value = task.desc;
+    document.getElementById("dueDate").value = task.dueDate;
+    document.getElementById("priority").value = task.priority;
+    document.getElementById("status").value = task.status;
+    this.deleteTask(index);
+  }
+
+  init() {
+    this.form.addEventListener("submit", (e) => this.addTask(e));
+    this.renderTasks();
+  }
+}
+
+let app = new CustomerFormHandler("taskForm");
+----------------------------------------------------
+
+3) View Submissions Page (view.html)  
+Class: SubmissionViewer  
+- Reads all tasks from localStorage.  
+- Displays them in a table.  
+- Includes a search bar to filter tasks by title.  
+- Shows “No data found” if nothing matches.  
+
+Example JavaScript:
+----------------------------------------------------
+class SubmissionViewer {
+  constructor() {
+    this.tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+    this.table = document.getElementById("taskTable");
+    this.search = document.getElementById("search");
+    this.init();
+  }
+
+  render() {
+    this.table.innerHTML = "";
+    let filtered = this.tasks.filter(t =>
+      t.title.toLowerCase().includes(this.search.value.toLowerCase())
+    );
+    if (filtered.length === 0) {
+      this.table.innerHTML = "<tr><td colspan='5'>No data found</td></tr>";
+      return;
+    }
+    filtered.forEach(t => {
+      this.table.innerHTML += `
+        <tr>
+          <td>${t.title}</td>
+          <td>${t.desc}</td>
+          <td>${t.dueDate}</td>
+          <td>${t.priority}</td>
+          <td>${t.status}</td>
+        </tr>
+      `;
+    });
+  }
+
+  init() {
+    this.search.addEventListener("input", () => this.render());
+    this.render();
+  }
+}
+let viewer = new SubmissionViewer();
+----------------------------------------------------
+
+Optional Bonus Features  
+- Add Delete button in table to remove specific tasks.  
+- Use a utility module for getItem() and setItem() to keep code clean.  
+- Use ES6 modules (<script type="module">) for better structure.  
+
+Validation Rules  
+- All fields required.  
+- Title must be at least 10 characters.  
+- Description and Due date must not be empty.  
+- Priority and Status must be selected.  
+
+Key Competencies Tested  
+- ES6 Classes & Modules  
+- DOM Manipulation & Event Handling  
+- Real-Time and Manual Form Validation  
+- LocalStorage CRUD Operations  
+- Dynamic HTML Rendering & Filtering  
+- Writing clean, modular, and reusable code  
+
+Reflective Thinking Questions  
+
+1) How could this app be enhanced by integrating with an API (e.g., saving data to a backend)?  
+Answer: If connected to a backend API, tasks could be saved online. This allows multiple users to access the same task list and keeps data safe even if the browser cache is cleared.  
+
+2) How can error handling be improved for a better user experience?  
+Answer: Instead of only alerts, I could use inline error messages, highlight invalid fields, and prevent form submission until errors are fixed.  
+
+3) What security concerns arise when storing customer data in localStorage?  
+Answer: Data in localStorage is not encrypted. Anyone with access to the browser can see or modify it. Sensitive data should never be stored in localStorage.  
+
+4) Could the app be scaled into a PWA (Progressive Web App) for offline use?  
+Answer: Yes. With service workers and caching, this app can work offline. It could also be installed on mobile devices like a native app, making it more powerful.  
