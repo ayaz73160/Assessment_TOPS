@@ -1,0 +1,297 @@
+=========================
+index.html
+=========================
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health Checkup Booking</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h2>Online Health Checkup Booking</h2>
+
+  <form id="bookingForm">
+    <div class="form-group">
+      <label for="fullName">Full Name</label>
+      <input type="text" id="fullName" placeholder="Enter your full name">
+      <span class="error" id="nameError"></span>
+    </div>
+
+    <div class="form-group">
+      <label for="phone">Phone Number</label>
+      <input type="text" id="phone" placeholder="10-digit phone number">
+      <span class="error" id="phoneError"></span>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="Enter your email">
+      <span class="error" id="emailError"></span>
+    </div>
+
+    <div class="form-group">
+      <label for="age">Age</label>
+      <input type="number" id="age" placeholder="Enter your age">
+      <span class="error" id="ageError"></span>
+    </div>
+
+    <div class="form-group">
+      <label for="date">Preferred Date</label>
+      <input type="date" id="date">
+      <span class="error" id="dateError"></span>
+    </div>
+
+    <div class="form-group">
+      <label for="concern">Health Concern</label>
+      <textarea id="concern" placeholder="Enter health concern"></textarea>
+      <span class="error" id="concernError"></span>
+    </div>
+
+    <div class="form-buttons">
+      <button type="submit">Submit</button>
+      <button type="reset">Reset</button>
+    </div>
+  </form>
+
+  <p id="successMsg"></p>
+  
+  <p><a href="view-bookings.html">View Bookings</a></p>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
+
+=========================
+view-bookings.html
+=========================
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Bookings</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h2>All Bookings</h2>
+
+  <table id="bookingsTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>Email</th>
+        <th>Age</th>
+        <th>Date</th>
+        <th>Concern</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      <!-- Data will be loaded here -->
+    </tbody>
+  </table>
+
+  <p id="noData"></p>
+
+  <p><a href="index.html">Back to Booking Form</a></p>
+
+  <script>
+    const tableBody = document.getElementById("tableBody");
+    const noData = document.getElementById("noData");
+
+    let bookings = JSON.parse(localStorage.getItem("bookings")) || [];
+
+    if (bookings.length === 0) {
+      noData.textContent = "No bookings available";
+    } else {
+      bookings.forEach(b => {
+        let row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${b.name}</td>
+          <td>${b.phone}</td>
+          <td>${b.email}</td>
+          <td>${b.age}</td>
+          <td>${b.date}</td>
+          <td>${b.concern}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+  </script>
+</body>
+</html>
+
+
+=========================
+style.css
+=========================
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  padding: 0;
+  background: #f9f9f9;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+form {
+  max-width: 500px;
+  margin: auto;
+  padding: 15px;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 0 5px gray;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.form-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+button {
+  padding: 8px 15px;
+  border: none;
+  background: #007BFF;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0056b3;
+}
+
+.error {
+  color: red;
+  font-size: 13px;
+}
+
+#successMsg {
+  text-align: center;
+  color: green;
+  font-weight: bold;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background: #007BFF;
+  color: white;
+}
+
+@media (max-width: 600px) {
+  form {
+    width: 100%;
+    margin: 10px;
+  }
+}
+
+
+=========================
+script.js
+=========================
+const bookingForm = document.getElementById("bookingForm");
+const successMsg = document.getElementById("successMsg");
+
+bookingForm.addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  // Get values
+  let name = document.getElementById("fullName").value.trim();
+  let phone = document.getElementById("phone").value.trim();
+  let email = document.getElementById("email").value.trim();
+  let age = document.getElementById("age").value.trim();
+  let date = document.getElementById("date").value.trim();
+  let concern = document.getElementById("concern").value.trim();
+
+  let valid = true;
+
+  // Reset errors
+  document.querySelectorAll(".error").forEach(e => e.textContent = "");
+
+  // Validation
+  if (name === "") {
+    document.getElementById("nameError").textContent = "Name is required";
+    valid = false;
+  }
+  if (!/^[0-9]{10}$/.test(phone)) {
+    document.getElementById("phoneError").textContent = "Phone must be 10 digits";
+    valid = false;
+  }
+  if (!/^[^ ]+@[^ ]+\.[a-z]{2,3}$/.test(email)) {
+    document.getElementById("emailError").textContent = "Invalid email format";
+    valid = false;
+  }
+  if (age < 1 || age > 120 || age === "") {
+    document.getElementById("ageError").textContent = "Age must be 1-120";
+    valid = false;
+  }
+  if (date === "") {
+    document.getElementById("dateError").textContent = "Date is required";
+    valid = false;
+  }
+  if (concern === "") {
+    document.getElementById("concernError").textContent = "Concern is required";
+    valid = false;
+  }
+
+  if (!valid) return;
+
+  // Save booking
+  let booking = { name, phone, email, age, date, concern };
+  let bookings = JSON.parse(localStorage.getItem("bookings")) || [];
+  bookings.push(booking);
+  localStorage.setItem("bookings", JSON.stringify(bookings));
+
+  successMsg.textContent = "Booking saved successfully!";
+
+  // Reset form
+  bookingForm.reset();
+
+  // Clear success message after 3 sec
+  setTimeout(() => { successMsg.textContent = ""; }, 3000);
+});
+
+
+=========================
+Reflective Thinking Answers
+=========================
+1) How would you add support for editing or canceling a booking using JavaScript and localStorage?
+- By displaying an "Edit" and "Delete" button next to each booking row in the table.
+- "Delete" would remove that entry from the bookings array and update localStorage.
+- "Edit" would pre-fill the form with existing booking details, allow changes, then update localStorage.
+
+2) Would integrating a calendar plugin or using real-time validation improve the system’s effectiveness?
+- Yes. A calendar plugin makes date selection easier and prevents invalid dates.
+- Real-time validation gives instant feedback (e.g., highlighting incorrect phone number while typing), improving user experience and reducing errors.
